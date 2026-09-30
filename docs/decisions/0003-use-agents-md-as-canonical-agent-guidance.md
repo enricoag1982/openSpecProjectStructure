@@ -1,5 +1,5 @@
 ---
-status: accepted
+status: superseded by ADR-0006
 date: 2026-09-30
 decision-makers: [project maintainers]
 consulted: []
@@ -83,6 +83,7 @@ Reviews check that tool-specific files only import or point to `AGENTS.md`. `npm
 
 ## More Information
 
+- Superseded by [ADR-0006](0006-target-claude-code-without-duplicated-agent-files.md): Claude Code only, each agent file stored once.
 - AGENTS.md: <https://agents.md/>
 - Claude Code memory and AGENTS.md support: <https://code.claude.com/docs/en/memory>
 - Agent Skills specification: <https://agentskills.io/>

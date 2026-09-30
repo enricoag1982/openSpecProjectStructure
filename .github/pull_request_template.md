@@ -16,4 +16,4 @@
 - [ ] Project build and tests pass
 - [ ] Change archived, or it stays open on purpose (say why)
 - [ ] Affected docs updated (architecture, guides, reference, glossary) and `last-reviewed` bumped
-- [ ] `AGENTS.md` or skills updated if agents need to know something new
+- [ ] `AGENTS.md`, an area `CLAUDE.md` or skills updated if agents need to know something new

@@ -7,7 +7,7 @@ It combines:
 - [OpenSpec](https://github.com/Fission-AI/OpenSpec) for spec-driven development
 - [MADR](https://adr.github.io/madr/) decision records
 - a trimmed [arc42](https://arc42.org/) architecture page
-- a canonical [AGENTS.md](https://agents.md/) with cross-tool [Agent Skills](https://agentskills.io/)
+- a canonical [AGENTS.md](https://agents.md/), set up for [Claude Code](https://code.claude.com/) with project skills and OpenSpec slash commands
 - plain Markdown that you can also browse as an [Obsidian](https://obsidian.md/) vault
 
 A small `npm run check` keeps it all honest in CI.
@@ -26,7 +26,7 @@ Every kind of knowledge therefore has exactly one home, a lifecycle and a check:
 | How it is built now | `docs/architecture/`, `guides/`, `reference/` | Living; `last-reviewed` date | `docs:check` (freshness, links) |
 | Shared vocabulary and principles | `docs/glossary.md`, `docs/principles.md` | Living | `docs:check` |
 | Explorations | `docs/research/` | Dated, non-normative | `docs:check` (links) |
-| How agents should behave | `AGENTS.md` (+ nested), skills | Grows from real mistakes | `docs:check` (skills in sync) |
+| How agents should behave | `AGENTS.md`, `CLAUDE.md` files, skills | Grows from real mistakes | `docs:check` (skill format, no duplicate skills) |
 
 ## Layout
 
@@ -36,11 +36,11 @@ Every kind of knowledge therefore has exactly one home, a lifecycle and a check:
 ├── CLAUDE.md                  # Claude Code adapter: imports AGENTS.md
 ├── openspec/
 │   ├── config.yaml            # project context + rules injected into OpenSpec workflows
-│   ├── AGENTS.md              # spec format rules
+│   ├── CLAUDE.md              # spec format rules
 │   ├── specs/                 # current behavior, one folder per capability
 │   └── changes/               # in-flight changes; archive/ holds finished ones
 ├── docs/
-│   ├── AGENTS.md              # documentation rules
+│   ├── CLAUDE.md              # documentation rules
 │   ├── principles.md          # the project's "constitution"
 │   ├── glossary.md            # ubiquitous language
 │   ├── decisions/             # ADRs (MADR 4) + generated decision log
@@ -50,12 +50,10 @@ Every kind of knowledge therefore has exactly one home, a lifecycle and a check:
 │   ├── reference/             # facts to look up (created as needed)
 │   ├── research/              # dated research notes and spikes
 │   └── templates/             # ADR, guide, research note, living doc (also Obsidian templates)
-├── .agents/skills/            # project skills (Agent Skills standard) + generated OpenSpec skills
-├── .claude/                   # Claude Code: skills (copies), /opsx commands, subagents, settings
-├── .gemini/settings.json      # makes Gemini CLI read AGENTS.md
+├── .claude/                   # Claude Code: skills, /opsx commands (generated), docs-reviewer subagent, settings
 ├── .obsidian/                 # shared Obsidian settings (Markdown links, templates, exclusions)
 ├── .github/                   # PR/issue templates, CODEOWNERS, CI
-└── scripts/docs.mjs           # ADR creation, decision log, link/freshness/skill checks
+└── scripts/                   # docs.mjs: ADRs, decision log, checks; openspec-update.mjs: regenerate /opsx commands
 ```
 
 ## Quick start
@@ -69,9 +67,9 @@ npm run adr:new -- "Use PostgreSQL for persistence"   # record a decision (statu
 npx openspec new change add-user-login  # start a change by hand (or /opsx:propose in your agent)
 ```
 
-For the agent slash commands, which call `openspec` directly, install the CLI globally once: `npm install -g @fission-ai/openspec@1.13.2`.
+The `/opsx:*` slash commands call `openspec` directly, so install the CLI globally once: `npm install -g @fission-ai/openspec@1.13.2`.
 
-Then, in Claude Code, Codex, Copilot, Cursor or Gemini CLI:
+Then, in Claude Code:
 
 1. `/opsx:explore`: think an idea through
 2. `/opsx:propose "..."`: proposal, delta specs, design and tasks

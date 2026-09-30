@@ -15,8 +15,9 @@ Architecture Decision Records (ADRs) in [MADR 4](https://adr.github.io/madr/) fo
 | --- | --- | --- | --- |
 | [ADR-0001](0001-record-architecture-decisions-with-madr.md) | Record architecture decisions as MADR files in the repository | accepted | 2026-09-30 |
 | [ADR-0002](0002-use-openspec-for-spec-driven-development.md) | Use OpenSpec for spec-driven development | accepted | 2026-09-30 |
-| [ADR-0003](0003-use-agents-md-as-canonical-agent-guidance.md) | Use AGENTS.md as the canonical agent guidance, with thin tool-specific adapters | accepted | 2026-09-30 |
+| [ADR-0003](0003-use-agents-md-as-canonical-agent-guidance.md) | Use AGENTS.md as the canonical agent guidance, with thin tool-specific adapters | superseded by ADR-0006 | 2026-09-30 |
 | [ADR-0004](0004-keep-docs-as-plain-markdown-browsable-in-obsidian.md) | Keep all project knowledge as plain Markdown in the repository, browsable in Obsidian | accepted | 2026-09-30 |
 | [ADR-0005](0005-choose-primary-implementation-language.md) | Choose the primary implementation language | proposed | 2026-09-30 |
+| [ADR-0006](0006-target-claude-code-without-duplicated-agent-files.md) | Target Claude Code, keep AGENTS.md canonical, and store each agent file once | accepted | 2026-09-30 |
 
 <!-- decision-log:end -->

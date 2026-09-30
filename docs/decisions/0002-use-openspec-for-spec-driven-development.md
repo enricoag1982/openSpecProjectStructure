@@ -43,7 +43,7 @@ Add more tools with `npx openspec init --tools <list>`.
 - Good, because the change and archive folders record the history of behavior, next to ADRs for the history of reasoning.
 - Good, because it has no runtime footprint: Markdown plus a Node.js CLI used only for tooling.
 - Bad, because OpenSpec's agent integration layer has changed often (1.x moved from `AGENTS.md` blocks to generated skills). Pinning the version and regenerating with `npm run agents:update` contains this.
-- Bad, because `MODIFIED` deltas must repeat the whole requirement, and headers must match exactly. `openspec/AGENTS.md` warns agents about this.
+- Bad, because `MODIFIED` deltas must repeat the whole requirement, and headers must match exactly. `openspec/CLAUDE.md` warns agents about this.
 - Neutral, because OpenSpec has no project-wide decision log or "constitution". ADRs ([ADR-0001](0001-record-architecture-decisions-with-madr.md)) and [principles](../principles.md) cover that.
 
 ### Confirmation
@@ -82,6 +82,7 @@ Add more tools with `npx openspec init --tools <list>`.
 
 ## More Information
 
+- Which tools get OpenSpec integration, and how it is regenerated (`npm run agents:update`), is now set by [ADR-0006](0006-target-claude-code-without-duplicated-agent-files.md).
 - Research: [2026-09-30 standards for agent-maintained project knowledge](../research/2026-09-30-standards-for-agent-maintained-project-knowledge.md)
-- Format rules for agents: [openspec/AGENTS.md](../../openspec/AGENTS.md)
+- Format rules for agents: [openspec/CLAUDE.md](../../openspec/CLAUDE.md)
 - Revisit if OpenSpec stops being maintained, or if per-feature specs become preferable to merged specs.

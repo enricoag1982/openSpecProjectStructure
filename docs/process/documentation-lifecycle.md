@@ -12,7 +12,7 @@ This page defines those rules. `npm run check` enforces most of them.
 
 | Type | Location | Changes by | Normative? | Frontmatter |
 | --- | --- | --- | --- | --- |
-| Agent guide | `AGENTS.md`, nested `*/AGENTS.md` | Edit in place | Yes, for agents | none |
+| Agent guide | `AGENTS.md`, `CLAUDE.md`, area `docs/CLAUDE.md` and `openspec/CLAUDE.md` | Edit in place | Yes, for agents | none |
 | Spec | `openspec/specs/<capability>/spec.md` | Archiving an OpenSpec change (not edited by hand) | Yes | none (OpenSpec format) |
 | Change | `openspec/changes/<id>/` | Edited while in flight, then archived and frozen | Proposal | `.openspec.yaml` |
 | Decision (ADR) | `docs/decisions/NNNN-*.md` | Append-only: superseded, never rewritten once accepted | Yes | `status`, `date`, `decision-makers`, `consulted`, `informed` |
@@ -76,5 +76,5 @@ For callouts, use GitHub alerts (`> [!NOTE]`, `[!TIP]`, `[!IMPORTANT]`, `[!WARNI
 | --- | --- |
 | `npm run specs:validate` | OpenSpec specs and in-flight changes are well-formed (`openspec validate --all --strict`) |
 | `npm run docs:lint` | Markdown style ([markdownlint](https://github.com/DavidAnson/markdownlint-cli2), config in `.markdownlint-cli2.jsonc`) |
-| `npm run docs:check` | ADR names, status and date; decision log up to date; relative links resolve; no wikilinks; review dates |
+| `npm run docs:check` | ADR names, status and date; decision log up to date; relative links resolve; no wikilinks; review dates; skills in `.claude/skills/` have a valid `name` and `description`, and no duplicate `openspec-*` skills exist |
 | `npm run check` | All of the above; CI runs it on every pull request |

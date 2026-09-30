@@ -7,6 +7,6 @@
 # /docs/decisions/       @your-org/architects
 # /docs/principles.md    @your-org/architects
 # /AGENTS.md             @your-org/maintainers
-# **/AGENTS.md           @your-org/maintainers
+# **/CLAUDE.md           @your-org/maintainers
 # /.claude/              @your-org/maintainers
 # /.github/workflows/    @your-org/maintainers
