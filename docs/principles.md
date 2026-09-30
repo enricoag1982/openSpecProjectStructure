@@ -9,7 +9,7 @@ The few rules that guide trade-offs when no spec or ADR covers a situation. This
 Changing a principle is a decision: record it as an ADR.
 
 > [!IMPORTANT]
-> Keep this page to about ten principles. If a rule applies only to one area, it belongs in a spec, an ADR or a nested `AGENTS.md`.
+> Keep this page to about ten principles. If a rule applies only to one area, it belongs in a spec, an ADR or an area `CLAUDE.md`.
 
 ## Working principles
 

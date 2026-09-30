@@ -1,23 +1,14 @@
 #!/usr/bin/env node
 // Documentation tooling for this repository. No dependencies beyond `yaml`.
 //
-//   node scripts/docs.mjs check [--strict]   validate decisions, links and review dates
+//   node scripts/docs.mjs check [--strict]   validate decisions, links, review dates and skills
 //   node scripts/docs.mjs index              regenerate the decision log in docs/decisions/README.md
 //   node scripts/docs.mjs new-adr "Title"    create the next decision record from the template
-//   node scripts/docs.mjs sync-skills        copy project skills from .agents/skills to .claude/skills
 //
 // Conventions enforced here are described in docs/process/documentation-lifecycle.md.
 
 import { execFileSync } from "node:child_process";
-import {
-  cpSync,
-  existsSync,
-  readFileSync,
-  readdirSync,
-  rmSync,
-  statSync,
-  writeFileSync,
-} from "node:fs";
+import { existsSync, readFileSync, readdirSync, statSync, writeFileSync } from "node:fs";
 import { dirname, join, normalize, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { parse as parseYaml } from "yaml";
@@ -37,11 +28,9 @@ const REVIEWED_DIRS = ["docs/architecture", "docs/guides", "docs/process", "docs
 const REVIEWED_FILES = ["docs/glossary.md", "docs/principles.md"];
 const REVIEW_MAX_AGE_DAYS = 180;
 
-// Project skills are authored in .agents/skills (read by Codex, Gemini CLI, Cursor, Copilot)
-// and copied to .claude/skills (read by Claude Code). openspec-* skills are generated per tool
-// by `openspec update` and are left alone.
-const SKILLS_SOURCE = ".agents/skills";
-const SKILLS_COPIES = [".claude/skills"];
+// Project skills (Agent Skills format). OpenSpec workflows are `/opsx:*` commands instead;
+// an `openspec-*` skill here means `openspec update` ran with the default delivery mode.
+const SKILLS_DIR = ".claude/skills";
 const GENERATED_SKILL = /^openspec-/;
 const SKILL_NAME = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
@@ -92,7 +81,7 @@ function loadDecisions() {
   const dir = join(ROOT, DECISIONS_DIR);
   if (!existsSync(dir)) return [];
   return readdirSync(dir)
-    .filter((name) => name.endsWith(".md") && !["README.md", "AGENTS.md"].includes(name))
+    .filter((name) => name.endsWith(".md") && !["README.md", "AGENTS.md", "CLAUDE.md"].includes(name))
     .sort()
     .map((name) => {
       const file = join(DECISIONS_DIR, name);
@@ -230,7 +219,7 @@ function checkReviewDates(files, today) {
   const living = files.filter(
     (f) =>
       REVIEWED_FILES.includes(f) ||
-      REVIEWED_DIRS.some((dir) => f.startsWith(`${dir}/`) && !f.endsWith("/AGENTS.md")),
+      REVIEWED_DIRS.some((dir) => f.startsWith(`${dir}/`) && !/\/(AGENTS|CLAUDE)\.md$/.test(f)),
   );
   for (const file of living) {
     const { data } = splitFrontmatter(read(file));
@@ -250,29 +239,23 @@ function checkReviewDates(files, today) {
 
 // ------------------------------------------------------------------- skills
 
-function projectSkills() {
-  const dir = join(ROOT, SKILLS_SOURCE);
-  if (!existsSync(dir)) return [];
-  return readdirSync(dir)
-    .filter((name) => !name.startsWith(".") && !GENERATED_SKILL.test(name))
-    .filter((name) => statSync(join(dir, name)).isDirectory())
-    .sort();
-}
-
-function filesUnder(dir) {
-  if (!existsSync(dir)) return [];
-  return readdirSync(dir, { recursive: true })
-    .map(String)
-    .filter((f) => statSync(join(dir, f)).isFile())
-    .sort();
-}
-
 function checkSkills() {
-  for (const name of projectSkills()) {
-    const source = join(SKILLS_SOURCE, name);
-    const skillFile = join(source, "SKILL.md");
+  const dir = join(ROOT, SKILLS_DIR);
+  if (!existsSync(dir)) return;
+  const names = readdirSync(dir).filter(
+    (name) => !name.startsWith(".") && statSync(join(dir, name)).isDirectory(),
+  );
+  for (const name of names) {
+    const folder = join(SKILLS_DIR, name);
+    if (GENERATED_SKILL.test(name)) {
+      errors.push(
+        `${folder}: duplicates an /opsx command; delete it and use \`npm run agents:update\`, not \`openspec update\``,
+      );
+      continue;
+    }
+    const skillFile = join(folder, "SKILL.md");
     if (!existsSync(join(ROOT, skillFile))) {
-      errors.push(`${source}: missing SKILL.md`);
+      errors.push(`${folder}: missing SKILL.md`);
       continue;
     }
     const { data } = splitFrontmatter(read(skillFile));
@@ -282,19 +265,6 @@ function checkSkills() {
     const description = String(data?.description ?? "");
     if (!description || description.length > 1024) {
       errors.push(`${skillFile}: description is required and must be at most 1024 characters`);
-    }
-    const sourceFiles = filesUnder(join(ROOT, source));
-    for (const copyRoot of SKILLS_COPIES) {
-      const copy = join(copyRoot, name);
-      const copyFiles = filesUnder(join(ROOT, copy));
-      const same =
-        sourceFiles.length === copyFiles.length &&
-        sourceFiles.every(
-          (f, i) =>
-            f === copyFiles[i] &&
-            readFileSync(join(ROOT, source, f)).equals(readFileSync(join(ROOT, copy, f))),
-        );
-      if (!same) errors.push(`${copy}: out of sync with ${source}, run \`npm run skills:sync\``);
     }
   }
 }
@@ -359,17 +329,6 @@ function commandNewAdr(titleWords) {
   console.log(`created ${relative(process.cwd(), join(ROOT, file))}`);
 }
 
-function commandSyncSkills() {
-  for (const name of projectSkills()) {
-    for (const copyRoot of SKILLS_COPIES) {
-      const copy = join(ROOT, copyRoot, name);
-      rmSync(copy, { recursive: true, force: true });
-      cpSync(join(ROOT, SKILLS_SOURCE, name), copy, { recursive: true });
-      console.log(`synced ${join(copyRoot, name)}`);
-    }
-  }
-}
-
 const [command, ...args] = process.argv.slice(2);
 switch (command) {
   case "check":
@@ -381,10 +340,7 @@ switch (command) {
   case "new-adr":
     commandNewAdr(args);
     break;
-  case "sync-skills":
-    commandSyncSkills();
-    break;
   default:
-    console.error("usage: node scripts/docs.mjs <check [--strict] | index | new-adr <title> | sync-skills>");
+    console.error("usage: node scripts/docs.mjs <check [--strict] | index | new-adr <title>>");
     process.exit(1);
 }

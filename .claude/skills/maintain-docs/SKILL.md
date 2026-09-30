@@ -24,7 +24,7 @@ Rules: `docs/process/documentation-lifecycle.md`. Each fact has one home and eve
 | adds or changes a component, integration, data store or deployment | `docs/architecture/README.md` (building blocks, context diagram, deployment) |
 | changes how to set up, build, run, release or debug | the relevant file in `docs/guides/` (create from `docs/templates/guide.md`) |
 | changes configuration, CLI, API surface or error codes | `docs/reference/` |
-| changes how the team or agents work | `docs/process/`, `AGENTS.md` or a nested `AGENTS.md`, or a skill |
+| changes how the team or agents work | `docs/process/`, `AGENTS.md`, an area `CLAUDE.md` (`docs/`, `openspec/`), or a skill |
 | accepts, rejects or supersedes an ADR | ADR status, `npm run docs:index`, and anything the decision affects |
 | finishes an OpenSpec change | archive it: `npx openspec archive <change-id> -y` |
 

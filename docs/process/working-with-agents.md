@@ -6,29 +6,31 @@ owner: ""
 # Working with AI agents
 
 This page explains how agent guidance is organized in this repository, how to work with agents day to day, and how to keep the guidance useful.
-The reasoning is in [ADR-0003](../decisions/0003-use-agents-md-as-canonical-agent-guidance.md).
+The template targets Claude Code, and every agent file is stored once. The reasoning is in [ADR-0006](../decisions/0006-target-claude-code-without-duplicated-agent-files.md).
 
 ## What agents read
 
 ```mermaid
 flowchart TD
-    agents[AGENTS.md<br/>canonical, always loaded] --> nested[docs/AGENTS.md<br/>openspec/AGENTS.md<br/>loaded when working there]
-    claude[CLAUDE.md<br/>@AGENTS.md + Claude notes] -.imports.-> agents
-    gemini[.gemini/settings.json<br/>context.fileName] -.points to.-> agents
+    claude[CLAUDE.md<br/>@AGENTS.md + Claude notes] -.imports.-> agents[AGENTS.md<br/>canonical, always loaded]
+    agents --> area[docs/CLAUDE.md<br/>openspec/CLAUDE.md<br/>loaded when working there]
     agents --> truth[Sources of truth<br/>specs, decisions, glossary,<br/>architecture, principles]
-    skills[Skills<br/>.agents/skills → .claude/skills<br/>loaded on demand] --> truth
-    config[openspec/config.yaml<br/>context + rules injected<br/>into OpenSpec workflows] --> truth
+    skills[.claude/skills<br/>loaded on demand] --> truth
+    opsx[.claude/commands/opsx<br/>/opsx:* workflows] --> config[openspec/config.yaml<br/>context + rules]
+    config --> truth
 ```
 
 | Layer | File | Loaded | Put here |
 | --- | --- | --- | --- |
-| Root guide | `AGENTS.md` | Every session | Overview, sources of truth, exact commands, workflow, boundaries, repo map |
-| Nested guides | `docs/AGENTS.md`, `openspec/AGENTS.md` | When the agent works in that folder | Rules that only apply there |
-| Tool adapters | `CLAUDE.md` (+ one-line `CLAUDE.md` next to each nested `AGENTS.md`), `.gemini/settings.json` | By that tool | Imports or pointers only, plus genuinely tool-specific notes |
-| Skills | `.agents/skills/<name>/SKILL.md` (copied to `.claude/skills/`) | When the task matches the skill's `description` | Step-by-step procedures: recording a decision, maintaining docs |
-| OpenSpec integration | `openspec/config.yaml`, generated `openspec-*` skills and `/opsx:*` commands | During OpenSpec workflows | Project context and per-artifact rules for proposals, specs, designs, tasks |
+| Root guide | `AGENTS.md`, imported by `CLAUDE.md` | Every session | Overview, sources of truth, exact commands, workflow, boundaries, repo map |
+| Claude notes | `CLAUDE.md` (below the import) | Every Claude Code session | Only what is specific to Claude Code |
+| Area rules | `docs/CLAUDE.md`, `openspec/CLAUDE.md` | When Claude works in that folder | Rules that only apply there |
+| Skills | `.claude/skills/<name>/SKILL.md` | When the task matches the skill's `description` | Step-by-step procedures: recording a decision, maintaining docs |
+| OpenSpec workflows | `.claude/commands/opsx/*.md` (generated) + `openspec/config.yaml` | When you run `/opsx:*` | Project context and per-artifact rules for proposals, specs, designs, tasks |
 | Subagents | `.claude/agents/*.md` | When delegated to | Focused reviewers, e.g. `docs-reviewer` |
 | Settings | `.claude/settings.json` | By Claude Code | Pre-approved safe commands |
+
+Other tools that read `AGENTS.md` natively (Codex, Copilot, Cursor and others) still get the root guide. Cursor and Copilot also read `.claude/skills/`.
 
 ## Day-to-day use
 
@@ -42,8 +44,7 @@ flowchart TD
 | Check docs are in sync before a PR | "Review docs drift", `docs-reviewer` subagent, `maintain-docs` skill |
 | Finish a change | `npm run check`, then `/opsx:archive <change-id>` |
 
-Command names differ per tool: `/opsx:propose` in Claude Code, `/opsx-propose` in Cursor and Copilot, `$openspec-propose` in Codex.
-OpenSpec's optional extra workflows (`/opsx:verify`, `/opsx:onboard`, `/opsx:ff` and others) can be enabled on your machine with `npx openspec config profile`, then `npm run agents:update`.
+OpenSpec also offers optional workflows (`verify`, `onboard`, `ff` and others). To enable them for the project, add them to the `workflows` list in `scripts/openspec-update.mjs` and run `npm run agents:update`. Ignore OpenSpec's hint to use `openspec config profile`: that changes only your machine's settings, which the script bypasses.
 
 Good habits:
 
@@ -54,27 +55,30 @@ Good habits:
 
 ## Adding another AI tool
 
-1. Check whether the tool reads `AGENTS.md` natively. Most do. If so, nothing else is needed for guidance.
-2. If it doesn't, add the thinnest possible adapter that imports or points to `AGENTS.md`, and list it in the "What agents read" table above.
-3. Generate OpenSpec commands for it: `npx openspec init --tools <tool-id>` (see `npx openspec init --help`), then add the generated folders to the `ignores` in `.markdownlint-cli2.jsonc` if needed.
-4. If the tool does not read `.agents/skills/`, add its skill folder to `SKILLS_COPIES` in `scripts/docs.mjs`.
+Record the change in a new ADR, since it revisits ADR-0006. Then:
+
+1. Check whether the tool reads `AGENTS.md` natively. Most do, and then nothing else is needed for guidance.
+2. If it doesn't, add the thinnest possible adapter that imports or points to `AGENTS.md`, and add it to the table above.
+3. Generate OpenSpec workflows for it with `npx openspec init --tools <tool-id>` (ids in `npx openspec init --help`). Delete any `openspec-*` skills it adds to `.claude/skills/`, add the generated folders to the `ignores` in `.markdownlint-cli2.jsonc`, and check that `npm run agents:update` keeps them. Its settings are in `scripts/openspec-update.mjs`.
+4. If the tool needs the project skills in its own folder, prefer a tool that reads `.claude/skills/`. Copying skills is what ADR-0006 removed.
 
 ## Keeping guidance useful
 
 Research on agent context files is sobering. Long, generic or LLM-generated instruction files often *lower* agent success rates and raise cost. Short, human-written, specific guidance works best.
 
 - **Every line must prevent a real mistake.** Ask: "Would removing this line make the agent do something wrong?" If not, delete it.
-- **Grow from failures.** When an agent makes the same mistake twice, add one precise line to the nearest `AGENTS.md` or skill, in the same PR as the fix.
+- **Grow from failures.** When an agent makes the same mistake twice, add one precise line to `AGENTS.md`, the nearest area `CLAUDE.md`, or a skill, in the same PR as the fix.
 - **Commands, not advice.** Exact commands with flags beat "make sure tests pass".
 - **Link, don't copy.** Point to specs, ADRs and docs instead of summarizing them.
-- **Budget.** Root `AGENTS.md` under about 150 lines; a skill's `SKILL.md` under 500 lines; the whole chain of `AGENTS.md` files under 32 KiB (the Codex default limit).
+- **Budget.** Root `AGENTS.md` under about 150 lines, area `CLAUDE.md` files under about 50, and a skill's `SKILL.md` under 500 lines.
 - **Checks over prose.** If a rule must always hold, add it to `npm run check` (`scripts/docs.mjs`) or CI and shorten the prose.
-- **Review quarterly.** This page and the `AGENTS.md` files are living documents. Prune rules that no longer fire.
+- **Review quarterly.** This page, `AGENTS.md` and the `CLAUDE.md` files are living documents. Prune rules that no longer fire.
 
 ## Updating generated agent files
 
 The OpenSpec CLI version is pinned in `package.json`. To upgrade:
 
 1. `npm install -D @fission-ai/openspec@<version>`
-2. `npm run agents:update` (runs `openspec update` to regenerate `openspec-*` skills and `/opsx` commands)
-3. Review the diff, run `npm run check`, and commit. Never hand-edit the generated files.
+2. `npm run agents:update`. It runs `openspec update` with the project's settings (commands only, the workflows listed in `scripts/openspec-update.mjs`) to regenerate `.claude/commands/opsx/`. Plain `openspec update` or `openspec init` would follow your machine's global settings and may add `openspec-*` skills, which `npm run check` rejects.
+3. Update the version in the global install command in `README.md`.
+4. Review the diff, run `npm run check`, and commit. Never hand-edit the generated files.

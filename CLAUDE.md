@@ -2,7 +2,7 @@
 
 ## Claude Code
 
-- OpenSpec slash commands: `/opsx:explore`, `/opsx:propose`, `/opsx:apply`, `/opsx:update`, `/opsx:sync`, `/opsx:archive`. They are generated; refresh them with `npm run agents:update`.
-- Project skills: `record-decision`, `maintain-docs`. They are copies from `.agents/skills/`: edit them there, then run `npm run skills:sync`.
+- OpenSpec workflows are the `/opsx:*` commands in `.claude/commands/opsx/`. They are generated; refresh them with `npm run agents:update`.
+- Project skills live in `.claude/skills/`: `record-decision`, `maintain-docs`.
 - Before finishing a change, delegate a drift review to the `docs-reviewer` subagent.
 - Personal, uncommitted notes go in `CLAUDE.local.md`.

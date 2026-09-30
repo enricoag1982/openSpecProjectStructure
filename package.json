@@ -16,8 +16,7 @@
     "docs:check": "node scripts/docs.mjs check",
     "docs:index": "node scripts/docs.mjs index",
     "adr:new": "node scripts/docs.mjs new-adr",
-    "skills:sync": "node scripts/docs.mjs sync-skills",
-    "agents:update": "openspec update"
+    "agents:update": "node scripts/openspec-update.mjs"
   },
   "devDependencies": {
     "@fission-ai/openspec": "1.13.2",

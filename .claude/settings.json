@@ -7,7 +7,6 @@
       "Bash(npm run changes:list)",
       "Bash(npm run docs:*)",
       "Bash(npm run adr:new:*)",
-      "Bash(npm run skills:sync)",
       "Bash(openspec list:*)",
       "Bash(openspec show:*)",
       "Bash(openspec status:*)",

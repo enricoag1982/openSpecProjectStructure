@@ -23,7 +23,7 @@ Before writing anything, pick the right home. Each piece of knowledge lives in e
 | Facts to look up (configuration, commands, interfaces) | `docs/reference/` | Living |
 | A domain or project term | [`docs/glossary.md`](../glossary.md) | Living |
 | A rule that guides trade-offs across the whole project | [`docs/principles.md`](../principles.md), changed through an ADR | Living, stable |
-| Rules and context for AI agents | `AGENTS.md` (root or nested) or a skill | Living |
+| Rules and context for AI agents | `AGENTS.md`, an area `CLAUDE.md`, or a skill in `.claude/skills/` | Living |
 | Work items, bugs, discussions | GitHub issues and pull requests | Tracking |
 
 A bug fix that restores specified behavior needs no spec change: fix it, add a test, reference the requirement in the PR.
@@ -97,7 +97,7 @@ Squash or merge according to the repository settings. The PR description links t
 - [ ] Affected living documents are updated and their `last-reviewed` is bumped
 - [ ] New terms are in the glossary
 - [ ] `npm run check` and the project's build/test commands pass
-- [ ] If an agent kept making the same mistake, `AGENTS.md` or a skill now prevents it
+- [ ] If an agent kept making the same mistake, `AGENTS.md`, an area `CLAUDE.md` or a skill now prevents it
 
 ## Conventions
 
